@@ -50,13 +50,12 @@
             border: 4px solid var(--blanco-puro);
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            cursor: pointer; /* Indica que es clickeable */
+            cursor: pointer;
         }
         .foto-portada img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
 
         h1 { font-family: 'Great Vibes', cursive; font-size: 3.8rem; color: var(--blanco-puro); margin: 0; }
 
-        /* PANEL DE ANFITRIONA */
         #admin-panel {
             display: none;
             background: #2d3436; color: white;
@@ -140,7 +139,6 @@
         <h3 style="color:var(--acento);">Panel de Control Anfitriona</h3>
         <p>Se generará un archivo ZIP con todos los momentos del evento.</p>
         <button class="btn-admin" onclick="descargarZipCloudinary()">📥 DESCARGAR TODAS LAS FOTOS (ZIP)</button>
-        <p style="font-size:0.7rem; color:#999; margin-top:15px;">Haz 3 clics en la foto circular para cerrar este panel.</p>
     </div>
 
     <div class="chat-container">
@@ -168,7 +166,9 @@
     </div>
 
     <script>
-        const API_ID = "w2rngy2vj0dv2"; 
+        // PEGA AQUÍ TU NUEVA URL DE GOOGLE SCRIPTS PARA LA BODA
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzoBw90h7aCJzfQd_FeNd9dkOjEQ_WFC0KOIBVrcsne8PN07WD0sGMMl2hiupjD865C/exec"; 
+        
         const cloudName = "dkoaxjahe";
         const uploadPreset = "ALBUN TEST";
         const eventTag = "boda_juan_maria_2026"; 
@@ -178,7 +178,6 @@
 
         function setCol(c) { col = c; document.getElementById('caja').style.backgroundColor = c; }
 
-        // --- TRIPLE CLIC EN FOTO DE PORTADA ---
         function detectarTripleClic() {
             clics++;
             if (clics === 3) {
@@ -190,21 +189,16 @@
                     if(pass === "1234") {
                         panel.style.display = 'block';
                         panel.scrollIntoView({behavior: 'smooth'});
-                    } else {
-                        alert("Clave incorrecta");
-                    }
+                    } else { alert("Clave incorrecta"); }
                 }
                 clics = 0;
             }
             setTimeout(() => { clics = 0; }, 1000);
         }
 
-        // --- DESCARGA DE ZIP (MÉTODO CLOUDINARY) ---
         function descargarZipCloudinary() {
-            // Este enlace genera un ZIP dinámico con todas las fotos que tengan el tag del evento
             const zipUrl = `https://res.cloudinary.com/${cloudName}/image/generate_archive?api_key=943272658145717&tag=${eventTag}&timestamp=${Math.floor(Date.now() / 1000)}`;
-            
-            alert("Iniciando la creación del archivo ZIP. Esto puede tardar unos segundos dependiendo del número de fotos...");
+            alert("Iniciando la creación del archivo ZIP...");
             window.location.href = zipUrl;
         }
 
@@ -212,31 +206,45 @@
             const nom = document.getElementById('n').value;
             const msg = document.getElementById('m').value;
             if(!nom || !msg) return alert("Escribe nombre y mensaje");
+            
             const btn = document.querySelector('.btn-enviar');
             btn.innerText = "Publicando...";
-            await fetch(`https://sheetdb.io/api/v1/${API_ID}`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({data: [{"Nombre": nom, "Mensaje": msg, "Color": col}]})
-            });
-            document.getElementById('m').value = "";
-            btn.innerText = "PUBLICAR DESEO";
-            cargarChat();
+
+            const data = new URLSearchParams();
+            data.append('Nombre', nom);
+            data.append('Mensaje', msg);
+            data.append('Color', col);
+
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    body: data
+                });
+                document.getElementById('m').value = "";
+                btn.innerText = "PUBLICAR DESEO";
+                setTimeout(cargarChat, 2000);
+            } catch (e) {
+                alert("Error al enviar");
+                btn.innerText = "PUBLICAR DESEO";
+            }
         }
 
         async function cargarChat() {
-            const res = await fetch(`https://sheetdb.io/api/v1/${API_ID}`);
-            const data = await res.json();
-            const muro = document.getElementById('muro-mensajes');
-            muro.innerHTML = "";
-            data.reverse().forEach(d => {
-                const s = document.createElement('div');
-                s.className = "sticker";
-                s.style.backgroundColor = d.Color || "#ffffff";
-                s.style.transform = `rotate(${Math.random()*4-2}deg)`;
-                s.innerHTML = `<strong>${d.Nombre}:</strong><p>${d.Mensaje}</p>`;
-                muro.appendChild(s);
-            });
+            try {
+                const res = await fetch(SCRIPT_URL);
+                const data = await res.json();
+                const muro = document.getElementById('muro-mensajes');
+                muro.innerHTML = "";
+                data.reverse().forEach(d => {
+                    const s = document.createElement('div');
+                    s.className = "sticker";
+                    s.style.backgroundColor = d.Color || "#ffffff";
+                    s.style.transform = `rotate(${Math.random()*4-2}deg)`;
+                    s.innerHTML = `<strong>${d.Nombre}:</strong><p>${d.Mensaje}</p>`;
+                    muro.appendChild(s);
+                });
+            } catch (e) { console.log("Cargando deseos..."); }
         }
 
         async function cargarFotos() {
@@ -250,7 +258,7 @@
                 const urlFull = `https://res.cloudinary.com/${cloudName}/image/upload/${img.public_id}.${img.format}`;
                 const div = document.createElement('div');
                 div.className = 'photo-item';
-                div.innerHTML = `<img src="${urlThumb}" onclick="window.open('${urlFull}')" oncontextmenu="return false;"><div class="tag">De: ${uploader}</div>`;
+                div.innerHTML = `<img src="${urlThumb}" onclick="window.open('${urlFull}')"><div class="tag">De: ${uploader}</div>`;
                 gal.appendChild(div);
             });
         }
@@ -265,7 +273,7 @@
 
         document.getElementById("upload_widget").onclick = () => widget.open();
 
-        window.onload = () => { cargarChat(); cargarFotos(); setInterval(cargarChat, 15000); };
+        window.onload = () => { cargarChat(); cargarFotos(); setInterval(cargarChat, 20000); };
     </script>
 </body>
 </html>
