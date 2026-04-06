@@ -166,7 +166,7 @@
     </div>
 
     <script>
-        // PEGA AQUÍ TU NUEVA URL DE GOOGLE SCRIPTS PARA LA BODA
+        // URL DE TU SCRIPT (Asegúrate de que sea la última implementación)
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAYEd_7x6MBcyorngCp1lz2w_oSh9UNLF96b9eXKV5dohGIta-3YSjf_xHMpVmLsI/exec"; 
         
         const cloudName = "dkoaxjahe";
@@ -223,7 +223,8 @@
                 });
                 document.getElementById('m').value = "";
                 btn.innerText = "PUBLICAR DESEO";
-                setTimeout(cargarChat, 2000);
+                // Esperamos un poco antes de recargar el chat
+                setTimeout(cargarChat, 2500);
             } catch (e) {
                 alert("Error al enviar");
                 btn.innerText = "PUBLICAR DESEO";
@@ -244,23 +245,27 @@
                     s.innerHTML = `<strong>${d.Nombre}:</strong><p>${d.Mensaje}</p>`;
                     muro.appendChild(s);
                 });
-            } catch (e) { console.log("Cargando deseos..."); }
+            } catch (e) { 
+                console.log("Sincronizando con Google Sheets..."); 
+            }
         }
 
         async function cargarFotos() {
-            const res = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/${eventTag}.json?v=${Date.now()}`);
-            const data = await res.json();
-            const gal = document.getElementById('galeria');
-            gal.innerHTML = "";
-            data.resources.forEach(img => {
-                let uploader = img.context?.custom?.uploader || "Invitado";
-                const urlThumb = `https://res.cloudinary.com/${cloudName}/image/upload/w_500,c_fill/${img.public_id}.${img.format}`;
-                const urlFull = `https://res.cloudinary.com/${cloudName}/image/upload/${img.public_id}.${img.format}`;
-                const div = document.createElement('div');
-                div.className = 'photo-item';
-                div.innerHTML = `<img src="${urlThumb}" onclick="window.open('${urlFull}')"><div class="tag">De: ${uploader}</div>`;
-                gal.appendChild(div);
-            });
+            try {
+                const res = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/${eventTag}.json?v=${Date.now()}`);
+                const data = await res.json();
+                const gal = document.getElementById('galeria');
+                gal.innerHTML = "";
+                data.resources.forEach(img => {
+                    let uploader = img.context?.custom?.uploader || "Invitado";
+                    const urlThumb = `https://res.cloudinary.com/${cloudName}/image/upload/w_500,c_fill/${img.public_id}.${img.format}`;
+                    const urlFull = `https://res.cloudinary.com/${cloudName}/image/upload/${img.public_id}.${img.format}`;
+                    const div = document.createElement('div');
+                    div.className = 'photo-item';
+                    div.innerHTML = `<img src="${urlThumb}" onclick="window.open('${urlFull}')"><div class="tag">De: ${uploader}</div>`;
+                    gal.appendChild(div);
+                });
+            } catch(e) { console.log("Esperando fotos..."); }
         }
 
         const widget = cloudinary.createUploadWidget({
@@ -273,7 +278,12 @@
 
         document.getElementById("upload_widget").onclick = () => widget.open();
 
-        window.onload = () => { cargarChat(); cargarFotos(); setInterval(cargarChat, 20000); };
+        window.onload = () => { 
+            cargarChat(); 
+            cargarFotos(); 
+            // Recargar automáticamente cada 30 segundos
+            setInterval(cargarChat, 30000); 
+        };
     </script>
 </body>
 </html>
