@@ -16,13 +16,21 @@
             --blanco-puro: #ffffff;
         }
 
+        /* SEGURIDAD: Bloqueo de selección */
         body {
             font-family: 'Montserrat', sans-serif;
             margin: 0; padding: 0;
             background-color: #f4f7f6;
             color: var(--texto);
             text-align: center;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
         }
+
+        /* Permitir escribir en mensajes */
+        input, textarea { user-select: text; -webkit-user-select: text; }
 
         .header-album {
             background: linear-gradient(-45deg, #1a2a6c, #2a4858, #000000);
@@ -49,9 +57,9 @@
         }
         .foto-portada img { width: 100%; height: 100%; object-fit: cover; }
 
-        h1 { font-family: 'Great Vibes', cursive; font-size: 3.8rem; color: var(--blanco-puro); margin: 0; cursor: pointer; user-select: none; }
+        h1 { font-family: 'Great Vibes', cursive; font-size: 3.8rem; color: var(--blanco-puro); margin: 0; cursor: pointer; }
 
-        /* PANEL DE ANFITRIONA (OCULTO) */
+        /* PANEL DE ANFITRIONA PROTEGIDO */
         #admin-panel {
             display: none;
             background: #2d3436; color: white;
@@ -61,10 +69,9 @@
 
         .btn-admin {
             background: #e17055; color: white; border: none;
-            padding: 10px; margin: 5px; border-radius: 8px; cursor: pointer;
+            padding: 12px; margin: 5px; border-radius: 8px; cursor: pointer; font-weight: bold;
         }
 
-        /* SECCIÓN MENSAJES */
         .chat-container {
             background: white;
             margin: -30px 15px 20px;
@@ -98,16 +105,15 @@
         .sticker {
             width: 140px; min-height: 140px; padding: 15px;
             text-align: left; box-shadow: 5px 5px 15px rgba(0,0,0,0.08);
-            font-size: 0.85rem; border-radius: 2px;
+            font-size: 0.85rem; border-radius: 2px; color: #333;
         }
 
-        /* GALERÍA */
         .gallery-grid {
             display: grid; grid-template-columns: repeat(3, 1fr);
             gap: 8px; padding: 15px; margin-bottom: 120px;
         }
         .photo-item { aspect-ratio: 1/1; background: #dfe6e9; border-radius: 8px; overflow: hidden; position: relative; }
-        .photo-item img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-item img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
         .tag { 
             position: absolute; bottom: 0; width: 100%; 
             background: rgba(26, 42, 108, 0.8); color: white; 
@@ -123,7 +129,7 @@
         }
     </style>
 </head>
-<body>
+<body oncontextmenu="return false;">
 
     <div class="header-album">
         <div class="foto-portada">
@@ -134,10 +140,10 @@
     </div>
 
     <div id="admin-panel">
-        <h3>Panel de Control (Anfitriona)</h3>
-        <button class="btn-admin" onclick="descargarTodasLasFotos()">📥 Descargar todas las fotos</button>
-        <button class="btn-admin" onclick="borrarTodoElChat()" style="background:red;">🗑️ Borrar mensajes (Limpiar Excel)</button>
-        <p style="font-size:0.7rem;">Haz clic de nuevo en el nombre para ocultar.</p>
+        <h3 style="color:var(--acento);">Acceso de Anfitriona</h3>
+        <button class="btn-admin" onclick="descargarTodasLasFotos()">📥 Descargar ZIP de Fotos</button>
+        <button class="btn-admin" onclick="borrarTodoElChat()" style="background:#d63031;">🗑️ Limpiar Mensajes</button>
+        <p style="font-size:0.7rem; color:#999;">Toca el nombre de nuevo para cerrar la sesión.</p>
     </div>
 
     <div class="chat-container">
@@ -173,119 +179,113 @@
         let col = "#ffffff";
         let clics = 0;
 
+        // --- SEGURIDAD: ANTICROBO ---
+        document.addEventListener('keydown', e => {
+            if(e.keyCode == 123 || (e.ctrlKey && e.shiftKey && (e.keyCode == 73 || e.keyCode == 74)) || (e.ctrlKey && e.keyCode == 85)) e.preventDefault();
+        });
+
         function setCol(c) { col = c; document.getElementById('caja').style.backgroundColor = c; }
 
-        // --- FUNCIÓN TRIPLE CLIC ---
+        // --- TRIPLE CLIC CON PASSWORD ---
         function detectarTripleClic() {
             clics++;
             if (clics === 3) {
                 const panel = document.getElementById('admin-panel');
-                panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+                if(panel.style.display === 'block') {
+                    panel.style.display = 'none';
+                } else {
+                    const pass = prompt("Introduce clave de Anfitriona:");
+                    if(pass === "1234") {
+                        panel.style.display = 'block';
+                    } else {
+                        alert("Acceso Denegado");
+                    }
+                }
                 clics = 0;
             }
             setTimeout(() => { clics = 0; }, 1000);
         }
 
-        // --- DESCARGAR FOTOS ---
         async function descargarTodasLasFotos() {
+            alert("Preparando descarga...");
             const res = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/${eventTag}.json`);
             const data = await res.json();
             data.resources.forEach((img, index) => {
                 const link = document.createElement('a');
                 link.href = `https://res.cloudinary.com/${cloudName}/image/upload/${img.public_id}.${img.format}`;
-                link.download = `foto_boda_${index}`;
+                link.download = `boda_jm_${index}`;
                 document.body.appendChild(link);
                 link.click();
                 document.body.removeChild(link);
             });
         }
 
-        // --- BORRAR TODO EL CHAT (Limpiar Excel) ---
         async function borrarTodoElChat() {
-            if(confirm("¿Seguro que quieres borrar TODOS los mensajes?")){
-                const pass = prompt("Contraseña de administrador:");
-                if(pass === "1234") { // Cambia esta contraseña si quieres
-                    await fetch(`https://sheetdb.io/api/v1/${API_ID}/all`, { method: 'DELETE' });
-                    location.reload();
-                } else { alert("Error de acceso"); }
+            if(confirm("¿Borrar todos los mensajes definitivamente?")){
+                await fetch(`https://sheetdb.io/api/v1/${API_ID}/all`, { method: 'DELETE' });
+                location.reload();
             }
         }
 
         async function enviar() {
             const nom = document.getElementById('n').value;
             const msg = document.getElementById('m').value;
-            if(!nom || !msg) return alert("Por favor, escribe tu nombre y un mensaje.");
+            if(!nom || !msg) return alert("Faltan datos");
             const btn = document.querySelector('.btn-enviar');
             btn.innerText = "Publicando...";
-            try {
-                await fetch(`https://sheetdb.io/api/v1/${API_ID}`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({data: [{"Nombre": nom, "Mensaje": msg, "Color": col}]})
-                });
-                document.getElementById('m').value = "";
-                cargarChat(); 
-            } catch(e) { alert("Error al enviar"); }
+            await fetch(`https://sheetdb.io/api/v1/${API_ID}`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({data: [{"Nombre": nom, "Mensaje": msg, "Color": col}]})
+            });
+            document.getElementById('m').value = "";
             btn.innerText = "PUBLICAR DESEO";
+            cargarChat();
         }
 
         async function cargarChat() {
-            try {
-                const res = await fetch(`https://sheetdb.io/api/v1/${API_ID}`);
-                const data = await res.json();
-                const muro = document.getElementById('muro-mensajes');
-                muro.innerHTML = "";
-                data.reverse().forEach(d => {
-                    const s = document.createElement('div');
-                    s.className = "sticker";
-                    s.style.backgroundColor = d.Color || "#ffffff";
-                    s.style.border = "1px solid #eee";
-                    s.style.transform = `rotate(${Math.random()*4-2}deg)`;
-                    s.innerHTML = `<strong>${d.Nombre}:</strong><p>${d.Mensaje}</p>`;
-                    muro.appendChild(s);
-                });
-            } catch(e) { console.log("Error chat"); }
+            const res = await fetch(`https://sheetdb.io/api/v1/${API_ID}`);
+            const data = await res.json();
+            const muro = document.getElementById('muro-mensajes');
+            muro.innerHTML = "";
+            data.reverse().forEach(d => {
+                const s = document.createElement('div');
+                s.className = "sticker";
+                s.style.backgroundColor = d.Color || "#ffffff";
+                s.style.transform = `rotate(${Math.random()*4-2}deg)`;
+                s.innerHTML = `<strong>${d.Nombre}:</strong><p>${d.Mensaje}</p>`;
+                muro.appendChild(s);
+            });
         }
 
         async function cargarFotos() {
-            try {
-                const res = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/${eventTag}.json?v=${Date.now()}`);
-                const data = await res.json();
-                const gal = document.getElementById('galeria');
-                gal.innerHTML = "";
-                data.resources.forEach(img => {
-                    let uploader = "Invitado";
-                    if (img.context && img.context.custom && img.context.custom.uploader) {
-                        uploader = img.context.custom.uploader;
-                    }
-                    const url = `https://res.cloudinary.com/${cloudName}/image/upload/w_500,c_fill/${img.public_id}.${img.format}`;
-                    const div = document.createElement('div');
-                    div.className = 'photo-item';
-                    div.innerHTML = `<img src="${url}" onclick="window.open('${url.replace('w_500,c_fill/','')}')"><div class="tag">De: ${uploader}</div>`;
-                    gal.appendChild(div);
-                });
-            } catch(e) { console.log("Error galería"); }
+            const res = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/${eventTag}.json?v=${Date.now()}`);
+            const data = await res.json();
+            const gal = document.getElementById('galeria');
+            gal.innerHTML = "";
+            data.resources.forEach(img => {
+                let uploader = img.context?.custom?.uploader || "Invitado";
+                const urlThumb = `https://res.cloudinary.com/${cloudName}/image/upload/w_500,c_fill/${img.public_id}.${img.format}`;
+                const urlFull = `https://res.cloudinary.com/${cloudName}/image/upload/${img.public_id}.${img.format}`;
+                const div = document.createElement('div');
+                div.className = 'photo-item';
+                // Los invitados pueden ver la foto al hacer clic, pero no descargarla fácilmente
+                div.innerHTML = `<img src="${urlThumb}" onclick="window.open('${urlFull}')"><div class="tag">De: ${uploader}</div>`;
+                gal.appendChild(div);
+            });
         }
 
         const widget = cloudinary.createUploadWidget({
-            cloudName: cloudName, 
-            uploadPreset: uploadPreset, 
-            tags: [eventTag],
+            cloudName: cloudName, uploadPreset: uploadPreset, tags: [eventTag],
             prepareUploadParams: (cb, params) => {
-                const n = prompt("¿Quién envía esta foto?") || "Anónimo";
+                const n = prompt("¿Tu nombre?") || "Anónimo";
                 cb({ context: `uploader=${n}` });
             }
-        }, (err, res) => { 
-            if(res.event === "success") setTimeout(cargarFotos, 2000); 
-        });
+        }, (err, res) => { if(res.event === "success") setTimeout(cargarFotos, 2000); });
 
         document.getElementById("upload_widget").onclick = () => widget.open();
 
-        window.onload = () => { 
-            cargarChat(); 
-            cargarFotos(); 
-            setInterval(cargarChat, 10000);
-        };
+        window.onload = () => { cargarChat(); cargarFotos(); setInterval(cargarChat, 15000); };
     </script>
 </body>
 </html>
