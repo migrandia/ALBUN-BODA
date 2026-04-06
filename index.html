@@ -10,7 +10,6 @@
 
     <style>
         :root {
-            /* COLORES DE BODA: Azul Marino, Plata y Blanco */
             --primario: #1a2a6c; 
             --acento: #b2bec3; 
             --texto: #2d3436;
@@ -20,12 +19,11 @@
         body {
             font-family: 'Montserrat', sans-serif;
             margin: 0; padding: 0;
-            background-color: #f4f7f6; /* Fondo gris muy tenue */
+            background-color: #f4f7f6;
             color: var(--texto);
             text-align: center;
         }
 
-        /* CABECERA ELEGANTE */
         .header-album {
             background: linear-gradient(-45deg, #1a2a6c, #2a4858, #000000);
             background-size: 400% 400%;
@@ -51,7 +49,20 @@
         }
         .foto-portada img { width: 100%; height: 100%; object-fit: cover; }
 
-        h1 { font-family: 'Great Vibes', cursive; font-size: 3.8rem; color: var(--blanco-puro); margin: 0; }
+        h1 { font-family: 'Great Vibes', cursive; font-size: 3.8rem; color: var(--blanco-puro); margin: 0; cursor: pointer; user-select: none; }
+
+        /* PANEL DE ANFITRIONA (OCULTO) */
+        #admin-panel {
+            display: none;
+            background: #2d3436; color: white;
+            padding: 20px; margin: 20px;
+            border-radius: 15px; border: 2px dashed var(--acento);
+        }
+
+        .btn-admin {
+            background: #e17055; color: white; border: none;
+            padding: 10px; margin: 5px; border-radius: 8px; cursor: pointer;
+        }
 
         /* SECCIÓN MENSAJES */
         .chat-container {
@@ -60,30 +71,23 @@
             padding: 30px 15px;
             border-radius: 25px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            position: relative;
         }
 
-        .color-selector {
-            display: flex; justify-content: center; gap: 10px; margin-bottom: 15px;
-        }
+        .color-selector { display: flex; justify-content: center; gap: 10px; margin-bottom: 15px; }
         .dot { width: 30px; height: 30px; border-radius: 50%; cursor: pointer; border: 2px solid #ddd; }
 
         .input-box {
-            background: #f8f9fa;
-            padding: 20px; border-radius: 20px;
-            max-width: 400px; margin: 0 auto;
-            border: 1px solid #eee;
+            background: #f8f9fa; padding: 20px; border-radius: 20px;
+            max-width: 400px; margin: 0 auto; border: 1px solid #eee;
         }
         .input-box input, .input-box textarea {
             width: 95%; border: none; background: transparent; 
-            font-family: 'Montserrat'; outline: none; margin-bottom: 10px;
-            font-size: 1rem;
+            font-family: 'Montserrat'; outline: none; margin-bottom: 10px; font-size: 1rem;
         }
 
         .btn-enviar {
             background: var(--primario); color: white; border: none;
-            padding: 12px 25px; border-radius: 25px; font-weight: bold; cursor: pointer;
-            width: 100%;
+            padding: 12px 25px; border-radius: 25px; font-weight: bold; cursor: pointer; width: 100%;
         }
 
         #muro-mensajes {
@@ -110,7 +114,6 @@
             font-size: 0.65rem; padding: 5px 0;
         }
 
-        /* BOTÓN SUBIR */
         .float-btn { position: fixed; bottom: 30px; width: 100%; z-index: 1000; }
         .btn-upload {
             background: var(--primario); color: white; border: 2px solid white;
@@ -126,12 +129,18 @@
         <div class="foto-portada">
             <img src="https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=400">
         </div>
-        <h1>Juan & María</h1>
+        <h1 onclick="detectarTripleClic()">Juan & María</h1>
         <p style="letter-spacing: 4px; font-size: 0.8rem; font-weight: bold;">NUESTRA BODA • 2026</p>
     </div>
 
+    <div id="admin-panel">
+        <h3>Panel de Control (Anfitriona)</h3>
+        <button class="btn-admin" onclick="descargarTodasLasFotos()">📥 Descargar todas las fotos</button>
+        <button class="btn-admin" onclick="borrarTodoElChat()" style="background:red;">🗑️ Borrar mensajes (Limpiar Excel)</button>
+        <p style="font-size:0.7rem;">Haz clic de nuevo en el nombre para ocultar.</p>
+    </div>
+
     <div class="chat-container">
-        <p style="font-size: 0.8rem; font-weight: bold; color: var(--primario);">DÉJANOS UN DESEO PARA EL FUTURO:</p>
         <div class="color-selector">
             <div class="dot" onclick="setCol('#ffffff')" style="background:#ffffff;"></div>
             <div class="dot" onclick="setCol('#f1f2f6')" style="background:#f1f2f6;"></div>
@@ -156,15 +165,51 @@
     </div>
 
     <script>
-        // --- CONFIGURACIÓN DEL CLIENTE (CAMBIA ESTO) ---
-        const API_ID = "w2rngy2vj0dv2"; // Pega aquí el ID de la NUEVA hoja de Sheets
+        const API_ID = "w2rngy2vj0dv2"; 
         const cloudName = "dkoaxjahe";
         const uploadPreset = "ALBUN TEST";
-        const eventTag = "boda_juan_maria_2026"; // Cambia este tag para cada cliente
-        // ----------------------------------------------
+        const eventTag = "boda_juan_maria_2026"; 
 
         let col = "#ffffff";
+        let clics = 0;
+
         function setCol(c) { col = c; document.getElementById('caja').style.backgroundColor = c; }
+
+        // --- FUNCIÓN TRIPLE CLIC ---
+        function detectarTripleClic() {
+            clics++;
+            if (clics === 3) {
+                const panel = document.getElementById('admin-panel');
+                panel.style.display = (panel.style.display === 'block') ? 'none' : 'block';
+                clics = 0;
+            }
+            setTimeout(() => { clics = 0; }, 1000);
+        }
+
+        // --- DESCARGAR FOTOS ---
+        async function descargarTodasLasFotos() {
+            const res = await fetch(`https://res.cloudinary.com/${cloudName}/image/list/${eventTag}.json`);
+            const data = await res.json();
+            data.resources.forEach((img, index) => {
+                const link = document.createElement('a');
+                link.href = `https://res.cloudinary.com/${cloudName}/image/upload/${img.public_id}.${img.format}`;
+                link.download = `foto_boda_${index}`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            });
+        }
+
+        // --- BORRAR TODO EL CHAT (Limpiar Excel) ---
+        async function borrarTodoElChat() {
+            if(confirm("¿Seguro que quieres borrar TODOS los mensajes?")){
+                const pass = prompt("Contraseña de administrador:");
+                if(pass === "1234") { // Cambia esta contraseña si quieres
+                    await fetch(`https://sheetdb.io/api/v1/${API_ID}/all`, { method: 'DELETE' });
+                    location.reload();
+                } else { alert("Error de acceso"); }
+            }
+        }
 
         async function enviar() {
             const nom = document.getElementById('n').value;
