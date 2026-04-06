@@ -166,8 +166,8 @@
     </div>
 
     <script>
-        // URL DE TU SCRIPT (Asegúrate de que sea la última implementación)
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxAYEd_7x6MBcyorngCp1lz2w_oSh9UNLF96b9eXKV5dohGIta-3YSjf_xHMpVmLsI/exec"; 
+        // URL ACTUALIZADA CON TU ÚLTIMA IMPLEMENTACIÓN
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyT3lvZwVTBz14AxLA4AEcbmeqmaqZS3y8V77lrlx8ouok7BZCsF7b1JLl2yxB_OTs/exec"; 
         
         const cloudName = "dkoaxjahe";
         const uploadPreset = "ALBUN TEST";
@@ -223,8 +223,7 @@
                 });
                 document.getElementById('m').value = "";
                 btn.innerText = "PUBLICAR DESEO";
-                // Esperamos un poco antes de recargar el chat
-                setTimeout(cargarChat, 2500);
+                setTimeout(cargarChat, 2000);
             } catch (e) {
                 alert("Error al enviar");
                 btn.innerText = "PUBLICAR DESEO";
@@ -245,9 +244,7 @@
                     s.innerHTML = `<strong>${d.Nombre}:</strong><p>${d.Mensaje}</p>`;
                     muro.appendChild(s);
                 });
-            } catch (e) { 
-                console.log("Sincronizando con Google Sheets..."); 
-            }
+            } catch (e) { console.log("Sincronizando mensajes..."); }
         }
 
         async function cargarFotos() {
@@ -265,7 +262,7 @@
                     div.innerHTML = `<img src="${urlThumb}" onclick="window.open('${urlFull}')"><div class="tag">De: ${uploader}</div>`;
                     gal.appendChild(div);
                 });
-            } catch(e) { console.log("Esperando fotos..."); }
+            } catch (e) { console.log("Cargando galería..."); }
         }
 
         const widget = cloudinary.createUploadWidget({
@@ -278,12 +275,7 @@
 
         document.getElementById("upload_widget").onclick = () => widget.open();
 
-        window.onload = () => { 
-            cargarChat(); 
-            cargarFotos(); 
-            // Recargar automáticamente cada 30 segundos
-            setInterval(cargarChat, 30000); 
-        };
+        window.onload = () => { cargarChat(); cargarFotos(); setInterval(cargarChat, 25000); };
     </script>
 </body>
 </html>
