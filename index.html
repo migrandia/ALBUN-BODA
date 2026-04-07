@@ -52,9 +52,9 @@
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             cursor: pointer;
         }
-        .foto-portada img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        .foto-portada img { width: 100%; height: 100%; object-fit: cover; }
 
-        h1 { font-family: 'Great Vibes', cursive; font-size: 3.8rem; color: var(--blanco-puro); margin: 0; }
+        h1 { font-family: 'Great Vibes', cursive; font-size: 3.8rem; color: var(--blanco-puro); margin: 0; cursor: pointer; }
 
         #admin-panel {
             display: none;
@@ -70,7 +70,7 @@
 
         .chat-container {
             background: white;
-            margin: -30px 10px 20px; /* Ajustado margen lateral */
+            margin: -30px 10px 20px;
             padding: 30px 10px;
             border-radius: 25px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
@@ -97,7 +97,7 @@
             display: flex; 
             flex-wrap: wrap; 
             justify-content: center;
-            gap: 10px; /* Espacio reducido para que quepan dos */
+            gap: 10px;
             margin-top: 30px; 
             max-height: 500px; 
             overflow-y: auto;
@@ -105,7 +105,7 @@
         }
 
         .sticker {
-            width: 130px; /* Tamaño idéntico al de XV años */
+            width: 130px;
             min-height: 130px; 
             padding: 12px;
             text-align: left; 
@@ -140,10 +140,12 @@
 <body oncontextmenu="return false;">
 
     <div class="header-album">
-        <div class="foto-portada" onclick="detectarTripleClic()">
-            <img src="https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=400">
+        <div class="foto-portada">
+            <a href="TU_URL_AQUI" target="_blank">
+                <img src="https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=400">
+            </a>
         </div>
-        <h1>Juan & María</h1>
+        <h1 onclick="detectarTripleClic()">Juan & María</h1>
         <p style="letter-spacing: 4px; font-size: 0.8rem; font-weight: bold;">NUESTRA BODA • 2026</p>
     </div>
 
