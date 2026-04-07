@@ -14,7 +14,6 @@
             --acento: #b2bec3; 
             --texto: #2d3436;
             --blanco-puro: #ffffff;
-            /* AQUÍ PUEDES CAMBIAR EL URL DEL FONDO FACILMENTE */
             --url-fondo-cabecera: url('https://www.dropbox.com/scl/fi/uoyjxmn2as5psbktmj6ex/FONDO-DE-ALBUN-DE-BODA-2.jpg?rlkey=o2gj2u8bzh6acfm24furscmp0&raw=1');
         }
 
@@ -24,6 +23,7 @@
             background-color: #f4f7f6;
             color: var(--texto);
             text-align: center;
+            /* Evita que seleccionen texto */
             -webkit-user-select: none;
             user-select: none;
         }
@@ -31,21 +31,13 @@
         input, textarea { user-select: text; -webkit-user-select: text; }
 
         .header-album {
-            /* SE QUITA EL DEGRADADO OSCURO PARA QUE LA FOTO SE VEA CLARA */
             background: var(--url-fondo-cabecera);
             background-size: cover;
             background-position: center;
             padding: 60px 20px;
             border-bottom: 5px solid var(--acento);
             color: white;
-            /* Sombra suave al texto para que se lea bien sobre el fondo claro */
             text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
         }
 
         .foto-portada {
@@ -55,7 +47,6 @@
             border: 4px solid var(--blanco-puro);
             overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            cursor: pointer;
         }
         .foto-portada img { width: 100%; height: 100%; object-fit: cover; }
 
@@ -70,7 +61,7 @@
 
         .btn-admin {
             background: #e17055; color: white; border: none;
-            padding: 15px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 1rem;
+            padding: 15px 25px; border-radius: 8px; cursor: pointer; font-weight: bold;
         }
 
         .chat-container {
@@ -99,31 +90,18 @@
         }
 
         #muro-mensajes {
-            display: flex; 
-            flex-wrap: wrap; 
-            justify-content: center;
-            gap: 10px;
-            margin-top: 30px; 
-            max-height: 500px; 
-            overflow-y: auto;
-            padding: 10px;
+            display: flex; flex-wrap: wrap; justify-content: center;
+            gap: 10px; margin-top: 30px; max-height: 500px; overflow-y: auto; padding: 10px;
         }
 
         .sticker {
-            width: 130px;
-            min-height: 130px; 
-            padding: 12px;
-            text-align: left; 
-            box-shadow: 3px 3px 10px rgba(0,0,0,0.1);
-            font-size: 0.8rem; 
-            border-radius: 2px; 
-            color: #333;
-            position: relative;
+            width: 130px; min-height: 130px; padding: 12px;
+            text-align: left; box-shadow: 3px 3px 10px rgba(0,0,0,0.1);
+            font-size: 0.8rem; border-radius: 2px; color: #333;
         }
 
         .gallery-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            display: grid; grid-template-columns: repeat(3, 1fr);
             gap: 8px; padding: 15px; margin-bottom: 120px;
         }
         .photo-item { aspect-ratio: 1/1; background: #dfe6e9; border-radius: 8px; overflow: hidden; position: relative; }
@@ -147,9 +125,7 @@
 
     <div class="header-album">
         <div class="foto-portada">
-            <a href="#" target="_blank">
-                <img src="https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=400">
-            </a>
+            <img src="https://images.pexels.com/photos/2253870/pexels-photo-2253870.jpeg?auto=compress&cs=tinysrgb&w=400">
         </div>
         <h1 onclick="detectarTripleClic()">Juan & María</h1>
         <p style="letter-spacing: 4px; font-size: 0.8rem; font-weight: bold;">NUESTRA BODA • 2026</p>
@@ -157,12 +133,10 @@
 
     <div id="admin-panel">
         <h3 style="color:var(--acento);">Panel de Control Anfitriona</h3>
-        <p>Se generará un archivo ZIP con todos los momentos del evento.</p>
         <button class="btn-admin" onclick="descargarZipCloudinary()">📥 DESCARGAR TODAS LAS FOTOS (ZIP)</button>
     </div>
 
     <div class="chat-container">
-        <p style="font-size: 0.7rem; font-weight: bold;">ELIGE UN COLOR Y DEJA TU MENSAJE:</p>
         <div class="color-selector">
             <div class="dot" onclick="setCol('#fff4ad')" style="background:#fff4ad;"></div>
             <div class="dot" onclick="setCol('#ffcfdf')" style="background:#ffcfdf;"></div>
@@ -172,7 +146,7 @@
 
         <div class="input-box" id="caja">
             <input type="text" id="n" placeholder="Tu nombre...">
-            <textarea id="m" placeholder="Escribe algo aquí..."></textarea>
+            <textarea id="m" placeholder="Escribe un deseo para los novios..."></textarea>
             <button class="btn-enviar" onclick="enviar()">ENVIAR MENSAJE</button>
         </div>
         <div id="muro-mensajes"></div>
@@ -190,11 +164,17 @@
         const cloudName = "dkoaxjahe";
         const uploadPreset = "ALBUN TEST";
         const eventTag = "boda_juan_maria_2026"; 
-
         let col = "#ffffff";
         let clics = 0;
 
         function setCol(c) { col = c; document.getElementById('caja').style.backgroundColor = c; }
+
+        // PROTECCIÓN DE CÓDIGO
+        document.onkeydown = function(e) {
+            if(e.keyCode == 123) return false; // F12
+            if(e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U
+            if(e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Ctrl+Shift+I
+        };
 
         function detectarTripleClic() {
             clics++;
@@ -251,7 +231,7 @@
                     s.innerHTML = `<strong>${d.Nombre}:</strong><p>${d.Mensaje}</p>`;
                     muro.appendChild(s);
                 });
-            } catch (e) { console.log("Sincronizando mensajes..."); }
+            } catch (e) { console.log("Sincronizando..."); }
         }
 
         async function cargarFotos() {
@@ -272,7 +252,10 @@
         }
 
         const widget = cloudinary.createUploadWidget({
-            cloudName: cloudName, uploadPreset: uploadPreset, tags: [eventTag],
+            cloudName: cloudName, 
+            uploadPreset: uploadPreset, 
+            tags: [eventTag],
+            clientAllowedFormats: ["png", "jpg", "jpeg"],
             prepareUploadParams: (cb, params) => {
                 const n = prompt("¿Quién envía la foto?") || "Invitado";
                 cb({ context: `uploader=${n}` });
