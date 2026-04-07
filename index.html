@@ -70,8 +70,8 @@
 
         .chat-container {
             background: white;
-            margin: -30px 15px 20px;
-            padding: 30px 15px;
+            margin: -30px 10px 20px; /* Ajustado margen lateral */
+            padding: 30px 10px;
             border-radius: 25px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
@@ -81,7 +81,7 @@
 
         .input-box {
             background: #f8f9fa; padding: 20px; border-radius: 20px;
-            max-width: 400px; margin: 0 auto; border: 1px solid #eee;
+            max-width: 350px; margin: 0 auto; border: 1px solid #eee;
         }
         .input-box input, .input-box textarea {
             width: 95%; border: none; background: transparent; 
@@ -94,14 +94,26 @@
         }
 
         #muro-mensajes {
-            display: flex; flex-wrap: wrap; justify-content: center;
-            gap: 15px; margin-top: 30px; max-height: 500px; overflow-y: auto;
+            display: flex; 
+            flex-wrap: wrap; 
+            justify-content: center;
+            gap: 10px; /* Espacio reducido para que quepan dos */
+            margin-top: 30px; 
+            max-height: 500px; 
+            overflow-y: auto;
+            padding: 10px;
         }
 
         .sticker {
-            width: 140px; min-height: 140px; padding: 15px;
-            text-align: left; box-shadow: 5px 5px 15px rgba(0,0,0,0.08);
-            font-size: 0.85rem; border-radius: 2px; color: #333;
+            width: 130px; /* Tamaño idéntico al de XV años */
+            min-height: 130px; 
+            padding: 12px;
+            text-align: left; 
+            box-shadow: 3px 3px 10px rgba(0,0,0,0.1);
+            font-size: 0.8rem; 
+            border-radius: 2px; 
+            color: #333;
+            position: relative;
         }
 
         .gallery-grid {
@@ -167,7 +179,6 @@
     </div>
 
     <script>
-        // URL ACTUALIZADA CON TU ÚLTIMA IMPLEMENTACIÓN
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyT3lvZwVTBz14AxLA4AEcbmeqmaqZS3y8V77lrlx8ouok7BZCsF7b1JLl2yxB_OTs/exec"; 
         
         const cloudName = "dkoaxjahe";
@@ -223,11 +234,11 @@
                     body: data
                 });
                 document.getElementById('m').value = "";
-                btn.innerText = "PUBLICAR DESEO";
+                btn.innerText = "ENVIAR MENSAJE";
                 setTimeout(cargarChat, 2000);
             } catch (e) {
                 alert("Error al enviar");
-                btn.innerText = "PUBLICAR DESEO";
+                btn.innerText = "ENVIAR MENSAJE";
             }
         }
 
@@ -241,7 +252,7 @@
                     const s = document.createElement('div');
                     s.className = "sticker";
                     s.style.backgroundColor = d.Color || "#ffffff";
-                    s.style.transform = `rotate(${Math.random()*4-2}deg)`;
+                    s.style.transform = `rotate(${Math.random()*6-3}deg)`;
                     s.innerHTML = `<strong>${d.Nombre}:</strong><p>${d.Mensaje}</p>`;
                     muro.appendChild(s);
                 });
