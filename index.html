@@ -14,6 +14,8 @@
             --acento: #b2bec3; 
             --texto: #2d3436;
             --blanco-puro: #ffffff;
+            /* AQUÍ PUEDES CAMBIAR EL URL DEL FONDO FACILMENTE */
+            --url-fondo-cabecera: url('https://www.dropbox.com/scl/fi/uoyjxmn2as5psbktmj6ex/FONDO-DE-ALBUN-DE-BODA-2.jpg?rlkey=o2gj2u8bzh6acfm24furscmp0&raw=1');
         }
 
         body {
@@ -29,17 +31,17 @@
         input, textarea { user-select: text; -webkit-user-select: text; }
 
         .header-album {
-            /* SE AGREGA LA URL PARA EL FONDO DE LA CABECERA AQUÍ */
-            background: linear-gradient(rgba(26, 42, 108, 0.6), rgba(0, 0, 0, 0.6)), 
-                        url('https://www.dropbox.com/scl/fi/uoyjxmn2as5psbktmj6ex/FONDO-DE-ALBUN-DE-BODA-2.jpg?rlkey=o2gj2u8bzh6acfm24furscmp0&raw=1'); 
+            /* SE QUITA EL DEGRADADO OSCURO PARA QUE LA FOTO SE VEA CLARA */
+            background: var(--url-fondo-cabecera);
             background-size: cover;
             background-position: center;
             padding: 60px 20px;
             border-bottom: 5px solid var(--acento);
             color: white;
+            /* Sombra suave al texto para que se lea bien sobre el fondo claro */
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* --- Animación opcional para el fondo si decides usar el degradado original --- */
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }
@@ -120,7 +122,8 @@
         }
 
         .gallery-grid {
-            display: grid; grid-template-columns: repeat(3, 1fr);
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
             gap: 8px; padding: 15px; margin-bottom: 120px;
         }
         .photo-item { aspect-ratio: 1/1; background: #dfe6e9; border-radius: 8px; overflow: hidden; position: relative; }
@@ -183,7 +186,7 @@
     </div>
 
     <script>
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyT3lvZwVTBz14AxLA4AEcbmeqmaqZS3y8V77lrlx8ouok7BZCsF7b1JLl2yxB_OTs/exec"; 
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyT3lvZwVTBz14AxLA4AEcbmeqmaqZS3y8V77lrlx8ouok7BZCsF7b1JLl2yxB_OTs/exec";
         const cloudName = "dkoaxjahe";
         const uploadPreset = "ALBUN TEST";
         const eventTag = "boda_juan_maria_2026"; 
@@ -223,7 +226,9 @@
             const btn = document.querySelector('.btn-enviar');
             btn.innerText = "Publicando...";
             const data = new URLSearchParams();
-            data.append('Nombre', nom); data.append('Mensaje', msg); data.append('Color', col);
+            data.append('Nombre', nom);
+            data.append('Mensaje', msg); 
+            data.append('Color', col);
             try {
                 await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: data });
                 document.getElementById('m').value = "";
